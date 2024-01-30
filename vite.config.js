@@ -1,0 +1,22 @@
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: [
+                'resources/sass/app.css',
+                'resources/js/app.js',
+            ],
+            refresh: true,
+        }),
+    ],
+    resolve:{
+        alias: {
+            "@": "/resources/js",
+        },
+    },
+    build: {
+        outDir: 'public/build', // Adjust the path as needed
+    },
+});
