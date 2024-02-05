@@ -5,18 +5,17 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/sass/app.css',
+                'resources/sass/app.scss',
                 'resources/js/app.js',
             ],
             refresh: true,
         }),
     ],
-    resolve:{
-        alias: {
-            "@": "/resources/js",
+    css: {
+        preprocessorOptions: {
+            scss: {
+                additionalData: `@import "variables";`, // Add your additional imports if needed
+            },
         },
-    },
-    build: {
-        outDir: 'public/build', // Adjust the path as needed
     },
 });

@@ -1,6 +1,7 @@
-// resources/assets/js/app.js
+import './bootstrap';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min';
+import Alpine from 'alpinejs';
 
-// Your other imports and code go here
+window.Alpine = Alpine;
+
+Alpine.start();
