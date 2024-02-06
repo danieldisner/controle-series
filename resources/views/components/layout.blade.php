@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ $title }} - Controle de Séries</title>
     <link rel="stylesheet" href="{{ asset('build/assets/app-8ae1c78e.css') }}"/>
-    @vite(['resources/sass/app.scss','resources/js/app.js'])
+    @vite(['resources/sass/app.scss', 'resources/js/app.js', 'resources/css/app.css'])
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
