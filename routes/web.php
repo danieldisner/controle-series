@@ -25,8 +25,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/email', function(){
-    return new SeriesCreated('Séries de Teste',1,5,10);
-});
-
 require __DIR__.'/auth.php';
