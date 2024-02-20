@@ -8,7 +8,7 @@ use App\Models\Episode;
 use App\Models\Season;
 use App\Models\Series;
 use App\Repositories\SeriesRepository;
-
+use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use App\Http\Middleware\Authenticate;
 
@@ -35,8 +35,7 @@ class SeriesController extends Controller
     public function store(SeriesFormRequest $request)
     {
         /* Adicionar Validação de tipo de arquivo */
-
-        $coverPath = $request->file('cover')->store('series_cover', 'public');
+        $coverPath = $request->file('cover') ? $request->file('cover')->store('series_cover', 'public') : null;
 
         $request->coverPath = $coverPath;
 
@@ -55,9 +54,18 @@ class SeriesController extends Controller
 
     public function destroy(Series $series)
     {
+        // Delete the cover image if it exists
+        if ($series->cover) {
+            $coverPath =  public_path('storage/' . $series->cover);
+            if (File::exists($coverPath)) {
+                File::delete($coverPath);
+            }
+        }
+
+        // Delete the series
         $series->delete();
 
-        return to_route('series.index')
+        return redirect()->route('series.index')
             ->with('mensagem.sucesso', "Série \"$series->nome\" removida com sucesso");
     }
 
