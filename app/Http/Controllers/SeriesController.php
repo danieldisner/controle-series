@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Middleware\Autenticador;
 use App\Http\Requests\SeriesFormRequest;
 use App\Events\SeriesCreated;
 use App\Models\Episode;
 use App\Models\Season;
 use App\Models\Series;
 use App\Repositories\SeriesRepository;
+
 use Illuminate\Http\Request;
+use App\Http\Middleware\Authenticate;
 
 class SeriesController extends Controller
 {
     public function __construct(private SeriesRepository $repository)
     {
-        $this->middleware(Autenticador::class)->except('index');
+        $this->middleware(Authenticate::class)->except('index');
     }
     public function index(Request $request)
     {
@@ -33,7 +34,15 @@ class SeriesController extends Controller
 
     public function store(SeriesFormRequest $request)
     {
+        /* Adicionar Validação de tipo de arquivo */
+
+        $coverPath = $request->file('cover')->store('series_cover', 'public');
+
+        $request->coverPath = $coverPath;
+
+        // Aplicar Design Pattern para reduzir o código
         $series = $this->repository->add($request);
+
         $seriesCreatedEvent = SeriesCreated::dispatch(
             $series->nome,
             $series->id,
@@ -59,8 +68,25 @@ class SeriesController extends Controller
 
     public function update(Series $series, SeriesFormRequest $request)
     {
-        $series->fill($request->all());
 
+        $coverPath = $request->file('cover')->store('series_cover', 'public');
+
+        if ($request->hasFile('cover')) {
+            $coverPath = $request->file('cover')->store('series_cover', 'public');
+            // Update the cover path in the Series model
+            $series->cover = $coverPath;
+        }
+
+        $series->update($request->except('cover'));
+
+        // Handle file upload if a new file is uploaded
+        if ($request->hasFile('cover')) {
+            $coverPath = $request->file('cover')->store('series_cover', 'public');
+            $series->cover = $coverPath;
+            $series->save();
+        }
+
+        // Save the series
         $series->save();
 
         $series->seasons()->delete();

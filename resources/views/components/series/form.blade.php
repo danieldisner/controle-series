@@ -1,11 +1,11 @@
-<form action="{{ $action }}" method="post">
+<form action="{{ $action }}" method="post" enctype="multipart/form-data">
     @csrf
 
     @if($update)
     @method('PUT')
     @endif
 
-    <div class="row mb-3">
+    <div class="mb-3 row">
         <div class="col-8">
             <label for="nome" class="form-label">Nome:</label>
             <input type="text"
@@ -30,6 +30,15 @@
                 name="episodesPerSeason"
                 class="form-control"
                 value="{{ old('episodesPerSeason') }}" />
+        </div>
+        <div class="mb-3 row">
+            <div class="col-12">
+                <label for="cover" class="form-lab">Capa</label>
+                @if(isset($serie) && $serie->cover)
+                    <img class="me-3" src="{{ asset('storage/' . $serie->cover) }}" width="60px">
+                @endif
+                <input type="file" id="cover" name="cover" class="form-control" accept="image/*">
+            </div>
         </div>
     </div>
 

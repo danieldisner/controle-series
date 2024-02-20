@@ -13,7 +13,11 @@ class EloquentSeriesRepository implements SeriesRepository
     public function add(SeriesFormRequest $request) : Series
     {
        return $series = DB::transaction(function() use ($request) {
-            $series = Series::create($request->all());
+            $series = Series::create([
+                'nome' => $request->nome,
+                'cover' => $request->coverPath
+                ]
+            );
 
             $seasons = [];
             for ($i = 1; $i <= $request->seasonsQty; $i++) {
