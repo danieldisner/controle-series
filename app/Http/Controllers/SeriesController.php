@@ -8,7 +8,7 @@ use App\Models\Episode;
 use App\Models\Season;
 use App\Models\Series;
 use App\Repositories\SeriesRepository;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Http\Middleware\Authenticate;
 
@@ -37,7 +37,15 @@ class SeriesController extends Controller
         /* Adicionar Validação de tipo de arquivo */
         $coverPath = $request->file('cover') ? $request->file('cover')->store('series_cover', 'public') : null;
 
-        $request->coverPath = $coverPath;
+        /*
+        *
+        *   // $request->coverPath = $coverPath;
+        *   By merging coverPath into the request,
+        *   you're ensuring that the property is defined before
+        *   attempting to access it, thus avoiding the "Undefined property"
+        *   error.
+        */
+        $request->merge(['coverPath' => $coverPath]);
 
         // Aplicar Design Pattern para reduzir o código
         $series = $this->repository->add($request);
@@ -56,9 +64,8 @@ class SeriesController extends Controller
     {
         // Delete the cover image if it exists
         if ($series->cover) {
-            $coverPath =  public_path('storage/' . $series->cover);
-            if (File::exists($coverPath)) {
-                File::delete($coverPath);
+            if (Storage::disk('public')->exists($series->cover)) {
+                Storage::disk('public')->delete($series->cover);
             }
         }
 
@@ -76,15 +83,20 @@ class SeriesController extends Controller
 
     public function update(Series $series, SeriesFormRequest $request)
     {
-
-        $coverPath = $request->file('cover')->store('series_cover', 'public');
-
+        // Handle Cover Image Update
         if ($request->hasFile('cover')) {
             $coverPath = $request->file('cover')->store('series_cover', 'public');
-            // Update the cover path in the Series model
+
+            // Delete the old cover image
+            if ($series->cover && Storage::disk('public')->exists($series->cover)) {
+                Storage::disk('public')->delete($series->cover);
+            }
+
+            // Update cover path in Series model
             $series->cover = $coverPath;
         }
 
+        // Update Series Information
         $series->update($request->except('cover'));
 
         // Handle file upload if a new file is uploaded
