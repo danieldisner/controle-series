@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SeriesFormRequest;
+use App\Http\Requests\SeriesRequest;
 use App\Events\SeriesCreated;
 use App\Models\Episode;
 use App\Models\Season;
@@ -32,7 +32,7 @@ class SeriesController extends Controller
         return view('series.create');
     }
 
-    public function store(SeriesFormRequest $request)
+    public function store(SeriesRequest $request)
     {
         /* Adicionar Validação de tipo de arquivo */
         $coverPath = $request->file('cover') ? $request->file('cover')->store('series_cover', 'public') : null;
@@ -81,7 +81,10 @@ class SeriesController extends Controller
         return view('series.edit')->with('serie', $series);
     }
 
-    public function update(Series $series, SeriesFormRequest $request)
+    /*
+    * Reduzir esse método, está muito grande, aplicar desing pattern
+    */
+    public function update(Series $series, SeriesRequest $request)
     {
         // Handle Cover Image Update
         if ($request->hasFile('cover')) {
