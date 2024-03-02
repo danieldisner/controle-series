@@ -26,5 +26,6 @@
             @endauth
         </li>
         @endforeach
+        {{ $series->links() }}
     </ul>
 </x-layout>

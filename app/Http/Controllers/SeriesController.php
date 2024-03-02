@@ -20,7 +20,7 @@ class SeriesController extends Controller
     }
     public function index(Request $request)
     {
-        $series = Series::all();
+        $series = Series::paginate(15);
         $mensagemSucesso = session('mensagem.sucesso');
 
         return view('series.index')->with('series', $series)

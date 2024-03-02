@@ -7,6 +7,8 @@ use App\Events\SeriesCreated;
 use App\Http\Requests\SeriesRequest;
 use App\Repositories\SeriesRepository;
 use App\Models\Series;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Http\Request;
 
 class SeriesController extends Controller
 {
@@ -15,22 +17,22 @@ class SeriesController extends Controller
     }
 
     // Method to fetch all series
-    public function index()
+    public function index(Request $request)
     {
-        return Series::all();
+        $query = Series::query();
+        if ($request->has('nome')) {
+            $query->where('nome', $request->nome);
+            //return Series::paginate();
+        }
+        return $query->paginate();
     }
 
     // Method to store a new series
     public function store(SeriesRequest $request)
     {
         // Check if the request contains a file named 'cover'
-        if ($request->hasFile('cover')) {
-            // Store the 'cover' file in the 'series_cover' directory under the 'public' disk
-            $coverPath = $request->file('cover')->store('series_cover', 'public');
-        } else {
-            // If no 'cover' file is found in the request, return a JSON response with an error message and status code 400 (Bad Request)
-            return response()->json(['error' => 'Nenhum arquivo foi enviado.'], 400);
-        }
+        // Store the 'cover' file in the 'series_cover' directory under the 'public' disk
+        $coverPath = $request->hasFile('cover')? $request->file('cover')->store('series_cover', 'public') : null;
 
         $request->merge(['coverPath' => $coverPath]);
 
@@ -45,5 +47,29 @@ class SeriesController extends Controller
         );
 
         return response()->json(['message' => 'Série criada com sucesso.', 'series' => $series], 201);
+    }
+
+    public function show(Series $series)
+    {
+        $seriesModel = Series::find($series);
+        if($seriesModel == null){
+            return response()->json(['message' => 'Series not found'], 404);
+        }
+        return $series;
+    }
+
+    public function update(Series $series, SeriesRequest $request)
+    {
+        $series->fill($request->all());
+        $series->save();
+
+        return $series;
+    }
+
+    public function destroy(int $series, Authenticatable $user)
+    {
+        dd($user->tokenCan('series:delete'));
+        Series::destroy($series);
+        return response()->noContent();
     }
 }
